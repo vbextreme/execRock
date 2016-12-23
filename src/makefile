@@ -42,7 +42,9 @@ install:
 	@cp ./$(APPPRJNAME) /usr/bin/$(APPPRJNAME)
 	@chown root:root /usr/bin/$(APPPRJNAME)
 	@chmod ug=swrx,o=sx /usr/bin/$(APPPRJNAME)
-	@echo '# app @ fromUser > Touser' > /etc/execRock.conf
+	@echo '# app @ fromUser > Touser' > ./execRock.conf
+	@cp -n ./execRock.conf /etc/execRock.conf
+	@rm ./execRock.conf
 	@chown root:root /etc/execRock.conf
 	@chmod ug=wrx,o-rwx /etc/execRock.conf
 	
