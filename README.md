@@ -7,7 +7,7 @@ Released to the GPL v3
 ### Install
 ```
 $ git clone https://github.com/vbextreme/execRock.git
-$ cd execRock
+$ cd execRock/src
 $ make
 $ sudo make install
 ```
