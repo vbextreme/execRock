@@ -7,8 +7,8 @@ LIBSO      =
 LIBA       =
 APPIPATH   = /usr/bin/
 IHPATH     = /usr/include/
-APPCFLAGS  = -Wall -Wextra -g
-APPDFLAGS  = -Wall -Wextra -g
+APPCFLAGS  = -Wall -Wextra -O2
+APPDFLAGS  = -Wall -Wextra -O2
 APPDEFINE:= -D_APP
 
 APPCC      = gcc

@@ -7,6 +7,7 @@
 #define _CONF_H_INCLUDE_
 
 #include "stdextra.h"
+#include "terminale.h"
 #include "optex.h"
 
 #define PROCESS_ERROR -1
