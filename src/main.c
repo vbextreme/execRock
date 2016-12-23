@@ -5,11 +5,11 @@
 
 #include "main.h" 
 
-struct argdef myargs[] =	{{ 'c', 'c', "command" , OPT_ARG, 0, "shell this command" },
-							 { 't', 't', "time"    , OPT_ARG, 0, "max time execution" },
-							 { 'r', 'r', "redirect", OPT_ARG, 0, "redirect to file" },
-							 { 'h', 'h', "help"    , OPT_ARG, 0, "help" },
-							 { 0  , 0  , 0         , OPT_ARG, 0, 0}
+struct argdef myargs[] =	{{ 'c', 'c', "command" , OPT_ARG  , 0, "shell this command" },
+							 { 't', 't', "time"    , OPT_ARG  , 0, "max time execution" },
+							 { 'r', 'r', "redirect", OPT_ARG  , 0, "redirect to file" },
+							 { 'h', 'h', "help"    , OPT_NOARG, 0, "help" },
+							 { 0  , 0  , 0         , OPT_NOARG, 0, 0}
 							};
 
 char_t* app_extract( char_t* cmd )
@@ -66,7 +66,7 @@ int main(int_t argCount, char_t** argValue)
 	
 	if ( cmd == 0 )
 	{
-		fprintf(stderr,"error: no command");
+		fprintf(stderr,"error: no command\n");
 		return -1;
 	}
 	
