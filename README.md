@@ -1,4 +1,4 @@
-#execRock
+#execRock v0.1
 run application as another user without requiring a password</br>
 
 Released to the GPL v3
@@ -36,3 +36,14 @@ run for max N milliseconds
 ```
 $ execRock -tc 1000 'apt-get update'
 ```
+
+the conf file accept regular expression for validate argument of a command.
+```
+# application | regexArgument@ fromUser > toUser
+```
+
+for example run only update or upgrade for apt
+```
+apt-get | up(date|grade)@ vbextreme > root
+```
+

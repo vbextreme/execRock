@@ -9,6 +9,7 @@
 #include "stdextra.h"
 #include "terminale.h"
 #include "optex.h"
+#include "rex.h"
 
 #define PROCESS_ERROR -1
 #define PROCESS_CHILD 0
@@ -17,10 +18,12 @@
 
 #define APP_MAX 128
 #define USER_MAX 128
+#define ARG_MAX 1024
 
 typedef struct erConf
 {
 	char_t app[APP_MAX];
+	char_t arg[ARG_MAX];
 	char_t from[USER_MAX];
 	char_t to[USER_MAX];
 }erConf_s;
@@ -29,7 +32,9 @@ typedef enum {PS_RUN, PS_EXITED, PS_ONSIGNAL, PS_STOP, PS_CONTINUE} processState
 
 /*** conf.c ***/
 erConf_s* conf_find(char_t* app, char_t* from);
-uid_t conf_toprivileges(char_t* app, char_t* from);
+err_t conf_validate_regex(char_t* arg, char_t* reg);
+erConf_s* conf_find_ex(char_t* app, char_t* arg, char_t* from);
+
 /*** proc.c ***/
 double bch_get();
 processState_e process_state(int_t* ex, pid_t pid, bool_t async);
@@ -45,10 +50,12 @@ err_t check_timelimit(pid_t pid, double timeLimit);
 
 
 
-__always_inline __private char_t* get_user_by_uid(uid_t uid)
+__always_inline __private err_t get_user_by_uid(uid_t uid, char_t* outUser)
 {
 	passwd_s* pw = getpwuid(uid);
-	return pw ? pw->pw_name : NULL;
+	if ( 0 == pw ) return -1;
+	strcpy(outUser, pw->pw_name);
+	return 0;
 }
 
 __always_inline __private uid_t get_uid_by_user(char_t* user)
@@ -64,8 +71,7 @@ __always_inline __private err_t set_effective_uid(uid_t uid){ return seteuid(uid
 
 /*
  * execRock.conf
- * user can lanch application with privilege
- * command@current_user>to_user
+ * command|regexargument@current_user>to_user
  */
 
 

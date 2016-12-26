@@ -42,7 +42,10 @@ install:
 	@cp ./$(APPPRJNAME) /usr/bin/$(APPPRJNAME)
 	@chown root:root /usr/bin/$(APPPRJNAME)
 	@chmod ug=swrx,o=sx /usr/bin/$(APPPRJNAME)
-	@echo '# app @ fromUser > Touser' > ./execRock.conf
+	@echo '# All application argument are valid' > ./execRock.conf
+	@echo '# app @ fromUser > Touser' >> ./execRock.conf
+	@echo '# Use regex to select valid argument' >> ./execRock.conf
+	@echo '# app | regexArgument@ fromUser > Touser' >> ./execRock.conf
 	@cp -n ./execRock.conf /etc/execRock.conf
 	@rm ./execRock.conf
 	@chown root:root /etc/execRock.conf
@@ -55,7 +58,8 @@ uninstall:
 fakeinstall:
 	@chown root:root ./$(APPPRJNAME)
 	@chmod ug=swrx,o=sx ./$(APPPRJNAME)
-	@echo '# app @ fromUser > Touser\napt-get@odroid>root' > /etc/execRock.conf
+	@echo '# app | optionalRegexArgument@ fromUser' > Touser
+	@echo 'apt-get@odroid>root' >> /etc/execRock.conf
 	@chown root:root /etc/execRock.conf
 	@chmod ug=wrx,o-rwx /etc/execRock.conf
 	
