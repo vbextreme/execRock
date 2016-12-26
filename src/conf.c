@@ -155,7 +155,7 @@ erConf_s* conf_find(char_t* app, char_t* from)
 
 err_t conf_validate_regex(char_t* arg, char_t* reg)
 {
-	dbg("");
+	dbg("argument: '%s'", arg);
 	if ( *reg == 0 )
 	{
 		dbg("no regex return ok");
@@ -183,8 +183,10 @@ err_t conf_validate_regex(char_t* arg, char_t* reg)
 		return -2;
 	}
 	
+	dbg("len arg: %u", strlen(arg));
 	dbg("offset start: %u", sto - arg);
-	dbg("offset remaning: %u", strlen(arg) - (eno - arg));
+	dbg("offset end %u", eno - arg );
+	dbg("offset rarg %u", f - arg);
 	
 	if ( (sto - arg) || (strlen(arg) - (eno-arg)) )
 	{

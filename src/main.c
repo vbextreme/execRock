@@ -38,7 +38,7 @@ __always_inline __private err_t app_extract( char_t* cmd, char_t* outApp, char_t
 __always_inline __private err_t valid_command( char_t* cmd )
 {
 	dbg("");
-	return strpbrk(cmd, "|;&") ? -1 : 0;
+	return strpbrk(cmd, "|;&\n") ? -1 : 0;
 }
 
 int main(int_t argCount, char_t** argValue)
@@ -91,7 +91,7 @@ int main(int_t argCount, char_t** argValue)
 	
 	if ( valid_command(cmd) )
 	{
-		fprintf(stderr,"error: '|&;' invalid command\n");
+		fprintf(stderr,"error: '|&;\\n' invalid command\n");
 		return -2;
 	}
 	
