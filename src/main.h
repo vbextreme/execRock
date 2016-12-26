@@ -19,6 +19,7 @@
 #define APP_MAX 128
 #define USER_MAX 128
 #define ARG_MAX 1024
+#define CMD_MAX 2048
 
 typedef struct erConf
 {

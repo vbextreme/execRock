@@ -199,7 +199,7 @@ err_t conf_validate_regex(char_t* arg, char_t* reg)
 
 erConf_s* conf_find_ex(char_t* app, char_t* arg, char_t* from)
 {
-	dbg("");
+	dbg("arg '%s'", arg);
 	iassert( app != 0 );
 	iassert( arg != 0 );
 	iassert( from != 0 );
