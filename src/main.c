@@ -12,7 +12,6 @@
 
 struct argdef myargs[] =	{
 							 { 't', 't', "time"    , OPT_ARG  , 0, "max time execution" },
-							 { 'r', 'r', "redirect", OPT_ARG  , 0, "redirect to file" },
 							 { 'T', 'T', "test"    , OPT_ARG  , 0, "regex to test" },
 							 { 'h', 'h', "help"    , OPT_NOARG, 0, "help" },
 							 { 0  , 0  , 0         , OPT_NOARG, 0, 0}
@@ -152,7 +151,6 @@ int main(int_t argCount, char_t** argValue)
     char_t* carg;
     double timeLimit = 0.0;
     char_t cmd[DIR_MAX];
-    char_t* rdTo = NULL;
     char_t* test = NULL;
     uint_t countArg = 0;
     char_t** aArg = NULL;
@@ -164,10 +162,6 @@ int main(int_t argCount, char_t** argValue)
         {	
 			case 't':
 				timeLimit = (double)strtoul(carg, 0, 10) / 1000.0;
-			break;
-			
-			case 'r':
-				rdTo = carg;
 			break;
 			
 			case 'T':
