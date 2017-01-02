@@ -125,6 +125,11 @@ int opt_parse(char** carg)
 	return a->retval;
 }
 
+unsigned int opt_parsed(void)
+{
+	return curarg;
+}
+
 void opt_help()
 {
 	int i = 0;

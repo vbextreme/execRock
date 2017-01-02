@@ -8,7 +8,7 @@ LIBA       =
 APPIPATH   = /usr/bin/
 IHPATH     = /usr/include/
 APPCFLAGS  = -Wall -Wextra -O2
-APPDFLAGS  = -Wall -Wextra -O2
+APPDFLAGS  = -Wall -Wextra -O2 -mcpu=native -mtune=native
 APPDEFINE:= -D_APP
 
 APPCC      = gcc
@@ -42,27 +42,24 @@ install:
 	@cp ./$(APPPRJNAME) /usr/bin/$(APPPRJNAME)
 	@chown root:root /usr/bin/$(APPPRJNAME)
 	@chmod ug=swrx,o=sx /usr/bin/$(APPPRJNAME)
-	@echo '# All application argument are valid' > ./execRock.conf
-	@echo '# app @ fromUser > Touser' >> ./execRock.conf
-	@echo '# Use regex to select valid argument' >> ./execRock.conf
-	@echo '# app | regexArgument@ fromUser > Touser' >> ./execRock.conf
+	@echo '# named @user or group' > ./execRock.conf
+	@echo '# not use chroot == no' >> ./execRock.conf
+	@echo '# temp chroot == tmp' >> ./execRock.conf
+	@echo '# preset chroot == /dir/dir' >> ./execRock.conf
+	@echo '# ' >> ./execRock.conf
+	@echo '# [application]' >> ./execRock.conf
+	@echo '# from = @user ' >> ./execRock.conf
+	@echo '# to = user:group' >> ./execRock.conf
+	@echo "# arg = 'regex' 'regex' ... '" >> ./execRock.conf
+	@echo '# chroot = tmp' >> ./execRock.conf
 	@cp -n ./execRock.conf /etc/execRock.conf
 	@rm ./execRock.conf
 	@chown root:root /etc/execRock.conf
-	@chmod ug=wrx,o-rwx /etc/execRock.conf
-	
-uninstall:
-	@rm /usr/bin/$(APPPRJNAME)
+	@chmod ug=wr,o-rwx /etc/execRock.conf
+
+clean-conf:
 	@rm /etc/execRock.conf
 
-fakeinstall:
-	@chown root:root ./$(APPPRJNAME)
-	@chmod ug=swrx,o=sx ./$(APPPRJNAME)
-	@echo '# app | optionalRegexArgument@ fromUser' > Touser
-	@echo 'apt-get@odroid>root' >> /etc/execRock.conf
-	@chown root:root /etc/execRock.conf
-	@chmod ug=wrx,o-rwx /etc/execRock.conf
-	
-fakeuninstall:
-	@rm ./$(APPPRJNAME)
+uninstall:
+	@rm /usr/bin/$(APPPRJNAME)
 	@rm /etc/execRock.conf

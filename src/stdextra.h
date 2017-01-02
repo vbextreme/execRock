@@ -21,6 +21,7 @@
 #include <pwd.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <grp.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <sys/resource.h>
@@ -40,7 +41,16 @@ typedef long long_t;
 typedef unsigned long ulong_t;
 typedef uint_t utf8_t;
 typedef FILE file_h;
+typedef DIR dir_h;
 typedef struct passwd passwd_s;
+typedef struct group group_s;
+
+typedef struct pipes
+{
+	int in;
+	int out;
+}pipe_s;
+
 /*
   struct passwd {
     char   *pw_name;       // username
@@ -53,7 +63,17 @@ typedef struct passwd passwd_s;
 	};
 */
 
+/*
+ struct group {
+    char   *gr_name;       // group name 
+    char   *gr_passwd;     // group password 
+    gid_t   gr_gid;        // group ID 
+    char  **gr_mem;        // group members 
+};
+*/
+
 #define strop(A,OP,B) (strcmp(A,B) OP 0)
+#define strnop(A,OP,BN) (strncmp(A, BN, strlen(BN)) OP 0)
 
 #define __private static
 

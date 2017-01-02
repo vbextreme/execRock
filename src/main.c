@@ -3,9 +3,15 @@
 /*** License view file in this directory ***/
 /*******************************************/
 
+//TODO
+
+// rifare test
+// CONFIG::
+// 		aggiungere redirectto
+
 #include "main.h" 
 
-struct argdef myargs[] =	{{ 'c', 'c', "command" , OPT_ARG  , 0, "shell this command" },
+struct argdef myargs[] =	{
 							 { 't', 't', "time"    , OPT_ARG  , 0, "max time execution" },
 							 { 'r', 'r', "redirect", OPT_ARG  , 0, "redirect to file" },
 							 { 'T', 'T', "test"    , OPT_ARG  , 0, "regex to test" },
@@ -13,53 +19,150 @@ struct argdef myargs[] =	{{ 'c', 'c', "command" , OPT_ARG  , 0, "shell this comm
 							 { 0  , 0  , 0         , OPT_NOARG, 0, 0}
 							};
 
-__always_inline __private err_t app_extract( char_t* cmd, char_t* outApp, char_t* outArg )
+char_t* parse_lib(char_t** s)
 {
-	dbg("command:'%s'",cmd);
+	dbg("");
+	char_t* r;
+	char_t* d = *s;
 	
-	uint_t size = APP_MAX - 1;
-	
-	while( size-->0 && (*cmd != ' ' && *cmd != 0 && *cmd != '\n') )
-		*outApp++ = *cmd++;	
-	*outApp = 0;
-	
-	if( *cmd == ' ' )
+	d = str_skip_space(d);
+	if ( *d != '/' )
 	{
-		while( *cmd == ' ' ) ++cmd;
-		size = ARG_MAX - 1;
-		while( size-->0 && (*cmd != '\n' && *cmd != 0) )
-			*outArg++ = *cmd++;	
+		d = strchr(d, '>');
+		if ( !d )
+		{
+			dbg("end parse");
+			return 0;
+		}
+		++d;
+		d = str_skip_space(d);
 	}
-	*outArg = 0;
+	r = d;
+	d = strchr(d, '(');
+	--d;
+	*d = 0;
+	d = strchr(d + 1, '\n');
+	if ( !d )
+	{
+		dbg("end parse");
+		return 0;
+	}
+	++d;
+	dbg("next parse:\n%s", d);
+	*s = d;
+	return r;
+}
+
+err_t clone_lib(char_t* dst, char_t* app)
+{
+	dbg("");
+	
+	char_t *ldd[] = {"ldd", app, NULL};
+	
+	char_t out[4096];
+	if ( system_getout(out, 4096, "/usr/bin/ldd", ldd) )
+	{
+		dbg("error ldd");
+		return -1;
+	}
+	
+	dbg("system return:\n%s", out);
+	
+	char_t* pr = out;
+	char_t* rt;
+	char_t tmp[DIR_MAX];
+	
+	while( (rt = parse_lib(&pr)) )
+	{
+		snprintf(tmp, DIR_MAX, "%s%s", dst, rt);
+		file_copy(tmp, rt);
+		chmod(tmp, S_IRWXU | S_IRWXG | S_IRWXO);
+	}
 	
 	return 0;
 }
 
-__always_inline __private err_t valid_command( char_t* cmd )
+err_t chroot_tmp_new(settingApp_s* sa, char_t* app )
 {
 	dbg("");
-	return strpbrk(cmd, "|;&") ? -1 : 0;
+	
+	//char_t* pr = tempnam(NULL, "chroot.");
+	//strcpy(outName, pr);
+	//dbg("chroot dir:'%s'", outName);
+	
+	char_t tmp[DIR_MAX];
+	snprintf(tmp, DIR_MAX, "%s%s", sa->chro, app);
+	if ( file_copy(tmp, app) )
+	{
+		dbg("error on copy app");
+		return -1;
+	}
+	chmod(tmp, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	
+	if ( clone_lib(sa->chro, app) )
+	{
+		dbg("error on clone lib");
+		return -2;
+	}
+	
+	return 0;
+}
+
+char_t* strofmvcpy(char_t* d, char_t** st, char_t* t)
+{
+	char_t* s = *st;
+	while( *s && !strchr(t,*s) )
+		*d++ = *s++;
+	*d = 0;
+	*st = *s ? s+1 : s ;
+	return d;
+}
+
+err_t findapp(char_t* out, char_t* app)
+{
+	char_t* PATH = getenv("PATH");
+	char_t* nx;
+	char_t* ph = PATH;
+	
+	while(1)
+	{
+		nx = strofmvcpy(out, &ph, ":\n");
+		if ( !*out ) break;
+		*nx = '/';
+		strcpy(nx + 1, app);
+		dbg("search on '%s'", out);
+		if ( !file_exist(out) ) return 0;
+	}
+	dbg("app not exist");
+	return -1;
+}
+
+__always_inline __private err_t valid_command( char_t* cmd )
+{
+	dbg("cmd:'%s'",cmd);
+	return strpbrk(cmd, "|;&\n") ? -1 : 0;
 }
 
 int main(int_t argCount, char_t** argValue)
 {
+	umask(0);
+	
 	opt_init(myargs, argValue, argCount);
 	
 	int_t ret;
     char_t* carg;
     double timeLimit = 0.0;
-    char_t* cmd = NULL;
+    char_t cmd[DIR_MAX];
     char_t* rdTo = NULL;
     char_t* test = NULL;
+    uint_t countArg = 0;
+    char_t** aArg = NULL;
     
-    while ( (ret = opt_parse(&carg)) >= 0 )
+    do
     {
+		ret = opt_parse(&carg);
         switch ( ret )
-        {
-			case 'c':
-				cmd = carg;
-			break;
-			
+        {	
 			case 't':
 				timeLimit = (double)strtoul(carg, 0, 10) / 1000.0;
 			break;
@@ -72,75 +175,84 @@ int main(int_t argCount, char_t** argValue)
 				test = carg;
 			break;
 			
+			case OPT_ERROR_NOOPT:
+				countArg = opt_parsed();
+				aArg = &argValue[countArg];
+				countArg = argCount - countArg;
+			break;
+			
+			case OPT_END:
+			break;
+			
 			default:
-				fprintf(stderr,"error: invalid argument\n");
 			case 'h':
 				opt_help();
 			return 0;
 		}
-	}
+	}while ( (ret) >= 0 );
 	
-	dbg("command::'%s'", cmd);
-	dbg("time::%f", timeLimit);
+	dbg("time::%f redirect::'%s' test::'%s' countArg::%d", timeLimit, rdTo ? rdTo : "", test ? test : "", countArg);
 	
-	if ( cmd == 0 )
+	if ( countArg < 1 )
 	{
 		fprintf(stderr,"error: no command\n");
 		return -1;
 	}
 	
-	if ( valid_command(cmd) )
+	if ( valid_command(aArg[0]) )
 	{
-		fprintf(stderr,"error: '|&;' invalid command\n");
+		fprintf(stderr, "error: '|&;\\n' invalid command\n");
 		return -2;
 	}
 	
-	
-	char_t toUser[USER_MAX];
-	if ( get_user_by_uid(get_real_uid(), toUser) )
+	if ( aArg[0][0] != '/' )
 	{
-		fprintf(stderr,"error: can't resolve uid\n");
-		return -3;
+		if ( findapp(cmd,aArg[0]) )
+		{
+			fprintf(stderr, "error: command not exist\n");
+			return -3;
+		}
+	}
+	else
+	{
+		strcpy(cmd, aArg[0]);
 	}
 	
-	char_t appName[APP_MAX];
-	char_t appArg[ARG_MAX];
-	if ( app_extract(cmd, appName, appArg) )
+	settingApp_s sa;
+	
+	if ( conf_read_setting(&sa, get_real_uid(), get_real_gid(), cmd, aArg + 1, countArg - 1) )
 	{
-		fprintf(stderr,"error: extract app and arg\n");
+		fprintf(stderr, "error: command not in config\n");
 		return -4;
 	}
 	
-	if ( test )
+	aArg[0] = app_name(cmd);
+	
+	pid_t pidChild;
+	dbg("use mode:%u", sa.mode);
+	
+	if ( sa.mode & SA_MODE_CHR )
 	{
-		if ( 0 ==  conf_validate_regex(appArg, test) )
+		dbg("setting chroot");
+		if ( sa.mode & SA_MODE_TMP )
 		{
-			puts("regex ok");
+			if ( chroot_tmp_new(&sa, cmd) )
+			{
+				fprintf(stderr, "error: create temp chroot\n");
+				return -5;
+			}
 		}
-		else
-		{
-			puts("regex fail");
-		}
-		return 0;
+		pidChild = system_safe(cmd, aArg, sa.chro, NULL, sa.usr, sa.grp);
+	}
+	else
+	{
+		pidChild = system_safe(cmd, aArg, NULL, NULL, sa.usr, sa.grp);
 	}
 	
-	erConf_s* ec = conf_find_ex(appName, appArg, toUser);
-	if ( 0 == ec )
-	{
-		fprintf(stderr,"error: app no match\n");
-		return -4;
-	}
-	
-	char_t cmdExec[CMD_MAX];
-	sprintf(cmdExec, "%s %s", appName, appArg);
-	
-	uid_t toUID = get_uid_by_user(ec->to);
-	
-	pid_t pidChild = system_safe(cmdExec, rdTo, toUID);
 	if ( pidChild < 0 )
 	{
 		fprintf(stderr,"error: fork\n");
-		return -5;
+		return -6;
 	}
 	
 	dbg("PID: %d", pidChild);
@@ -161,6 +273,7 @@ int main(int_t argCount, char_t** argValue)
 			kill(pidChild, SIGKILL);
 		}
 	}
+	
 	
 	return 0;
 }

@@ -25,6 +25,7 @@ struct argdef
 
 void opt_init(struct argdef* ar, char** mainargv, int mainargc);
 int opt_parse(char** carg);
+unsigned int opt_parsed(void);
 void opt_help();
 
 #endif
