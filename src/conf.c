@@ -110,6 +110,7 @@ __private err_t conf_to(settingApp_s* out, char_t* s)
 		dbg("error not find user");
 		return -1;
 	}
+	dbg("find user '%s' uid %u", s, out->usr);
 	
 	out->grp = get_gid_by_group(gn + 1);
 	if ( out->grp == (gid_t)~0 )
@@ -117,13 +118,14 @@ __private err_t conf_to(settingApp_s* out, char_t* s)
 		dbg("error not find group");
 		return -1;
 	}
+	dbg("find group '%s' gid %u", gn+1, out->grp);
 	
-	dbg("to u:%u g:%u", out->usr, out->grp);
 	return 0;
 }
 
 __private err_t conf_arg_extract(char_t* d, char_t** src)
 {
+	char_t* stdest = d;
 	dbg("src:\"%s\"", *src);
 	if ( !*src )
 	{
@@ -146,14 +148,14 @@ __private err_t conf_arg_extract(char_t* d, char_t** src)
 		*d++ = *s++;
 	}
 	*d = 0;
-	dbg("arg:'%s'", d);
+	dbg("arg:'%s'", stdest);
 	if ( *s != '\'' )
 	{
 		dbg("fail not closed '");
 		*src = s;
 		return -1;
 	}
-	*src = s;
+	*src = s + 1;
 	return 0;
 }
 

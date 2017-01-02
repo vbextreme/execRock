@@ -81,20 +81,40 @@ pid_t system_safe(char_t* cmd, char_t** arg, char_t* chro, char_t* redirectTo, u
 				}
 			}
 			
-			if ( switchUser != (uid_t)~0 )
-			{
-				dbg("start from user r:%u e:%u", get_real_uid(), get_effective_uid());
-				if ( set_real_uid(switchUser) ) dbg("fail set real uid %d: %s",errno, strerror(errno) );
-				if ( set_effective_uid(switchUser) ) dbg("fail set effective uid %d: %s",errno, strerror(errno) ); 
-				dbg("switch user(%u) r:%u e:%u", switchUser, get_real_uid(), get_effective_uid());
-			}
-			
 			if ( switchGroup != (gid_t)~0 )
 			{
 				dbg("start from group r:%u e:%u", get_real_gid(), get_effective_gid());
-				if ( set_real_gid(switchGroup) ) dbg("fail set real uid %d: %s",errno, strerror(errno) );
-				if ( set_effective_gid(switchGroup) ) dbg("fail set effective uid %d: %s",errno, strerror(errno) ); 
+				if ( set_real_gid(switchGroup) )
+				{
+					dbg("fail set real gid, %d: %s",errno, strerror(errno) );
+					dbg("exit :(");
+					_exit(-1);
+				}
+				if ( set_effective_gid(switchGroup) )
+				{
+					dbg("fail set effective gid, %d: %s",errno, strerror(errno) ); 
+					dbg("exit :(");
+					_exit(-1);
+				}
 				dbg("switch group(%u) r:%u e:%u", switchGroup, get_real_gid(), get_effective_gid());
+			}
+			
+			if ( switchUser != (uid_t)~0 )
+			{
+				dbg("start from user r:%u e:%u", get_real_uid(), get_effective_uid());
+				if ( set_real_uid(switchUser) )
+				{
+					dbg("fail set real uid, %d: %s",errno, strerror(errno) );
+					dbg("exit :(");
+					_exit(-1);
+				}
+				if ( set_effective_uid(switchUser) )
+				{
+					dbg("fail set effective uid, %d: %s",errno, strerror(errno) ); 
+					dbg("exit :(");
+					_exit(-1);
+				}
+				dbg("switch user(%u) r:%u e:%u", switchUser, get_real_uid(), get_effective_uid());
 			}
 			
 			if ( redirectTo )
