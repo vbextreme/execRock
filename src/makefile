@@ -47,11 +47,11 @@ install:
 	@echo '# temp chroot == tmp' >> ./execRock.conf
 	@echo '# preset chroot == /dir/dir' >> ./execRock.conf
 	@echo '# ' >> ./execRock.conf
-	@echo '# [application]' >> ./execRock.conf
+	@echo '# [/dir/application]' >> ./execRock.conf
 	@echo '# from = @user ' >> ./execRock.conf
 	@echo '# to = user:group' >> ./execRock.conf
 	@echo "# arg = 'regex' 'regex' ... '" >> ./execRock.conf
-	@echo '# chroot = tmp' >> ./execRock.conf
+	@echo '# chroot = no' >> ./execRock.conf
 	@cp -n ./execRock.conf /etc/execRock.conf
 	@rm ./execRock.conf
 	@chown root:root /etc/execRock.conf
