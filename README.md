@@ -53,3 +53,19 @@ run for max N milliseconds
 ```
 $ execRock -t 1000 apt-get update
 ```
+
+example, execute ls in a chroot</br>
+add in /etc/execRock.conf
+```
+[/bin/ls]
+from = @myuser
+to = unprivilegeUser:unprivilegeGroup
+arg = 
+chroot = tmp
+```
+
+now call
+```
+$ execRock ls
+```
+and this execute in chroot
